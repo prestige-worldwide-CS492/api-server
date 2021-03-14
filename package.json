@@ -1,0 +1,23 @@
+{
+  "name": "api-server",
+  "version": "0.0.1",
+  "description": "API Server",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prestige-worldwide-CS492/api-server.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/prestige-worldwide-CS492/api-server/issues"
+  },
+  "homepage": "https://github.com/prestige-worldwide-CS492/api-server#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
