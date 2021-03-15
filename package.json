@@ -4,7 +4,7 @@
   "description": "API Server",
   "main": "dist/index.js",
   "scripts": {
-    "run": "ts-standard --fix && tsc && node .",
+    "run": "tsc && node .",
     "fix": "ts-standard --fix"
   },
   "repository": {
