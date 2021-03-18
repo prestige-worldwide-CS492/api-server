@@ -20,10 +20,28 @@ const app = express()
 const port = env['PORT'] ?? '8080'
 const host = env['HOST'] ?? '127.0.0.1'
 
+/**
+ * This endpoint retrieves a document from the database by its UUID.
+ * This endpoint expects a claim ID in the form of a UUIDv4.  It
+ * returns the following response codes:
+ * 200 - returns the requested document
+ * 401 - the request did not provide the required authentication token
+ * 403 - the provided token does not have the required permisssions for this record
+ * 404 - the requested document does not exist
+ */
 app.get('/claims/:claimID', (_req, _res) => {
 
 })
 
+/**
+ * This endpoint inserts a document into the database.  The form data
+ * shoud be `application/json` and transmitted via POST request.
+ * This endpoint returns the following response codes:
+ * 200 - returns a UUIDv4 for this claim
+ * 400 - the posted form data is invalid
+ * 401 - the request did not provide the required authentication token
+ * 403 - this token does not have the required permissions
+ */
 app.post('/claims', express.json(), (req, res) => {
   const policyNumber = req.body['policy_number']
   const address = req.body['address']
