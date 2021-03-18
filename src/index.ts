@@ -19,9 +19,12 @@ import { env } from 'process'
 import { MongoClient } from 'mongodb'
 import { v4 as UUIDv4 } from 'uuid'
 
-const app = express()
 const port = env['PORT'] ?? '8080'
 const host = env['HOST'] ?? '127.0.0.1'
+const dbHost = env['DB_HOST'] ?? 'mongodb://localhost'
+
+const app = express()
+const mongo = MongoClient.connect(dbHost)
 
 app.use(express.json())
 app.use(cors())
@@ -35,8 +38,13 @@ app.use(cors())
  * 403 - the provided token does not have the required permisssions for this record
  * 404 - the requested document does not exist
  */
-app.get('/claims/:claimID', (_req, _res) => {
-
+app.get('/claims/:claimID', (req, res) => {
+  
+  mongo
+    .then(client => client.db('x').collection('claims'))
+    .then(db => db.findOne({ uuid: req.params['claimID'] }))
+    .then(JSON.stringify)
+    .then(res.end)
 })
 
 /**
