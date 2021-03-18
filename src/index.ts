@@ -16,6 +16,7 @@
 import express from 'express'
 import cors from 'cors'
 import { env } from 'process'
+import { MongoClient } from 'mongodb'
 
 const app = express()
 const port = env['PORT'] ?? '8080'
@@ -46,7 +47,7 @@ app.get('/claims/:claimID', (_req, _res) => {
  * 401 - the request did not provide the required authentication token
  * 403 - this token does not have the required permissions
  */
-app.post('/claims', express.json(), (req, res) => {
+app.post('/claims', (req, res) => {
   const policyNumber = req.body['policy_number']
   const address = req.body['address']
   const category = req.body['category']
