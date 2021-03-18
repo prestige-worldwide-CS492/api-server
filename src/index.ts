@@ -14,11 +14,15 @@
  */
 
 import express from 'express'
+import cors from 'cors'
 import { env } from 'process'
 
 const app = express()
 const port = env['PORT'] ?? '8080'
 const host = env['HOST'] ?? '127.0.0.1'
+
+app.use(express.json())
+app.use(cors())
 
 /**
  * This endpoint retrieves a document from the database by its UUID.
