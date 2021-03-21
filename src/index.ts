@@ -25,6 +25,8 @@ const dbHost = env['DB_HOST'] ?? 'mongodb://localhost'
 
 const app = express()
 const mongo = MongoClient.connect(dbHost)
+  .then(client => client.db('hartford'))
+  .then(client => client.collection('claims'))
 
 app.use(express.json())
 app.use(cors())
@@ -41,8 +43,7 @@ app.use(cors())
 app.get('/claims/:claimID', (req, res) => {
   
   mongo
-    .then(client => client.db('x').collection('claims'))
-    .then(db => db.findOne({ uuid: req.params['claimID'] }))
+    .then(db => db.findOne({ id: req.params['claimID'] }))
     .then(JSON.stringify)
     .then(res.end)
 })
@@ -57,20 +58,24 @@ app.get('/claims/:claimID', (req, res) => {
  * 403 - this token does not have the required permissions
  */
 app.post('/claims', (req, res) => {
-  const policyNumber = req.body['policy_number']
-  const address = req.body['address']
-  const category = req.body['category']
-  const description = req.body['description']
-  const firstName = req.body['first_name']
-  const lastName = req.body['last_name']
+  const document = {
+    policyNumber: req.body['policy_number'],
+    category: req.body['category'],
+    description: req.body['description'],
+    firstName: req.body['first_name'],
+    lastName: req.body['last_name'],
+    uuid: UUIDv4(),
+  }
 
-  // Success
-  res.status(200)
-  res.end(JSON.stringify({ status: 200, message: 'Ok' }))
+  const response = {
+    status: 200,
+    uuid: document.uuid,
+  }
 
-  // ToDo: Invalid
-  // res.status(400)
-  // res.end(/* Some Error */)
+  mongo
+    .then(db => db.insertOne(document))
+    .then(() => res.status(200))
+    .then(() => res.end(JSON.stringify(response)))
 })
 
 app.listen(parseInt(port), host)
