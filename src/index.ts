@@ -19,7 +19,7 @@ import fetch from 'node-fetch'
 import { env } from 'process'
 import { MongoClient } from 'mongodb'
 import { v4 as UUIDv4 } from 'uuid'
-import { STATIC_MAPS } from 'external'
+import { STATIC_MAPS } from './external'
 
 const port = env['PORT'] ?? '8080'
 const host = env['HOST'] ?? '127.0.0.1'
