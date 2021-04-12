@@ -61,6 +61,17 @@ app.get("/claims", (req, res) => {
   );
 });
 
+//this endpoint will get all claims associated with a policynumber.
+app.get("/claims/search/:policyNumber", (req, res) => {
+  const query = { policyNumber: req.params["policyNumber"] };
+  mongo.then((db) =>
+    db.find(query).toArray(function (err, result) {
+      if (err) throw err;
+      res.send(result);
+    })
+  );
+});
+
 /**
  * This endpoint inserts a document into the database.  The form data
  * shoud be `application/json` and transmitted via POST request.
