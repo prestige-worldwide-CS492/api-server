@@ -51,7 +51,6 @@ app.get("/claims/:claimID", (req, res) => {
 });
 
 //This endpoint will return all claims in the database.
-
 app.get("/claims", (req, res) => {
   mongo.then((db) =>
     db.find().toArray(function (err, result) {
@@ -62,8 +61,25 @@ app.get("/claims", (req, res) => {
 });
 
 //this endpoint will get all claims associated with a policynumber.
+// this can be used in the insurer search page to narrow down their search
 app.get("/claims/search/:policyNumber", (req, res) => {
   const query = { policyNumber: req.params["policyNumber"] };
+  mongo.then((db) =>
+    db.find(query).toArray(function (err, result) {
+      if (err) throw err;
+      res.send(result);
+    })
+  );
+});
+
+//this endpoint will return claims associated with a last name AND policynumber
+//this can be used by the claimant to view their claims
+
+app.get("/claims/view/:policyNumber/:lastName", (req, res) => {
+  const query = {
+    policyNumber: req.params["policyNumber"],
+    lastName: req.params["lastName"],
+  };
   mongo.then((db) =>
     db.find(query).toArray(function (err, result) {
       if (err) throw err;
