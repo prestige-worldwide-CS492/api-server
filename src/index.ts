@@ -82,6 +82,25 @@ app.post('/claims', (req, res) => {
     .then(() => res.end(JSON.stringify(response)))
 })
 
+
+/**
+ * This endpoint is used to search through the database
+ * for any claims that match the given params
+ */
+app.get('/claims', (req, res) => {
+  const query = {
+    firstName: req.query['firstName'] ?? /.*/,
+    lastName: req.query['lastName'] ?? /.*/,
+    policyNumber: req.query['policyNumber'] ?? /.*/
+  }
+
+  mongo
+    .then(db => db.find(query))
+    .then(db => db.toArray())
+    .then(db => JSON.stringify(db))
+    .then(db => res.end(db))
+})
+
 /**
  * This endpoint returns a static map associated with a claim to
  * be displayed on the "view claims" page.
