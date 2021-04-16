@@ -75,10 +75,11 @@ app.get("/claims/search/:policyNumber", (req, res) => {
 //this endpoint will return claims associated with a last name AND policynumber
 //this can be used by the claimant to view their claims
 
-app.get("/claims/view/:policyNumber/:lastName", (req, res) => {
+app.get("/claims/view/:policyNumber/:firstName/:lastName", (req, res) => {
   const query = {
     policyNumber: req.params["policyNumber"],
     lastName: req.params["lastName"],
+    firstName: req.params["firstName"],
   };
   mongo.then((db) =>
     db.find(query).toArray(function (err, result) {
