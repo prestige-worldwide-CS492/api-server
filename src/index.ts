@@ -70,6 +70,7 @@ app.post('/claims', (req, res) => {
     address: req.body['address'],
     dateSubmitted: new Date().toUTCString(),
     dateOccurred: req.body['date_occurred'],
+    status: "Unprocessed",
     _id: UUIDv4(),
   }
 
