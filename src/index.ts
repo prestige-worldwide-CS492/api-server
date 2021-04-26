@@ -68,6 +68,8 @@ app.post('/claims', (req, res) => {
     firstName: req.body['first_name'],
     lastName: req.body['last_name'],
     address: req.body['address'],
+    dateSubmitted: new Date().toUTCString(),
+    dateOccurred: req.body['date_occurred'],
     _id: UUIDv4(),
   }
 
