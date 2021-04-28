@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-import express from 'express'
-import cors from 'cors'
-import fetch from 'node-fetch'
-import { env } from 'process'
-import { MongoClient } from 'mongodb'
-import { v4 as UUIDv4 } from 'uuid'
-import { STATIC_MAPS } from './external'
+import express from "express";
+import cors from "cors";
+import fetch from "node-fetch";
+import { env } from "process";
+import { MongoClient } from "mongodb";
+import { v4 as UUIDv4 } from "uuid";
+import { PLACE_AUTOCOMPLETE, STATIC_MAPS } from "./external";
 
-const port = env['PORT'] ?? '8080'
-const host = env['HOST'] ?? '127.0.0.1'
-const dbHost = env['DB_HOST'] ?? 'mongodb+srv://localhost:8000'
-const googleKey = env['GOOGLE_KEY'] ?? 'xxxx-xxxx'
-
-const app = express()
+const port = env["PORT"] ?? "8080";
+const host = env["HOST"] ?? "127.0.0.1";
+const dbHost = env["DB_HOST"] ?? "mongodb+srv://localhost:8000";
+const googleKey = env["GOOGLE_KEY"] ?? "xxxx-xxxx";
+const placesKey = env["PLACES_KEY"] ?? "xxxx-xxxx";
+const app = express();
 const mongo = MongoClient.connect(dbHost)
-  .then(client => client.db('hartford'))
-  .then(client => client.collection('claims'))
+  .then((client) => client.db("hartford"))
+  .then((client) => client.collection("claims"));
 
-app.use(express.json())
-app.use(cors())
+app.use(express.json());
+app.use(cors());
 
 /**
  * This endpoint retrieves a document from the database by its UUID.
@@ -43,13 +43,12 @@ app.use(cors())
  * 403 - the provided token does not have the required permisssions for this record
  * 404 - the requested document does not exist
  */
-app.get('/claims/:claimID', (req, res) => {
-  
+app.get("/claims/:claimID", (req, res) => {
   mongo
-    .then(db => db.findOne({ _id: req.params['claimID'] }))
+    .then((db) => db.findOne({ _id: req.params["claimID"] }))
     .then(JSON.stringify)
-    .then(x => res.end(x))
-})
+    .then((x) => res.end(x));
+});
 
 /**
  * This endpoint inserts a document into the database.  The form data
@@ -60,60 +59,73 @@ app.get('/claims/:claimID', (req, res) => {
  * 401 - the request did not provide the required authentication token
  * 403 - this token does not have the required permissions
  */
-app.post('/claims', (req, res) => {
+app.post("/claims", (req, res) => {
   const document = {
-    policyNumber: req.body['policy_number'],
-    category: req.body['category'],
-    description: req.body['description'],
-    firstName: req.body['first_name'],
-    lastName: req.body['last_name'],
-    address: req.body['address'],
+    policyNumber: req.body["policy_number"],
+    category: req.body["category"],
+    description: req.body["description"],
+    firstName: req.body["first_name"],
+    lastName: req.body["last_name"],
+    address: req.body["address"],
     dateSubmitted: new Date().toUTCString(),
-    dateOccurred: req.body['date_occurred'],
+    dateOccurred: req.body["date_occurred"],
     status: "Unprocessed",
     _id: UUIDv4(),
-  }
+  };
 
   const response = {
     status: 200,
     uuid: document._id,
-  }
+  };
 
   mongo
-    .then(db => db.insertOne(document))
+    .then((db) => db.insertOne(document))
     .then(() => res.status(200))
-    .then(() => res.end(JSON.stringify(response)))
-})
-
+    .then(() => res.end(JSON.stringify(response)));
+});
 
 /**
  * This endpoint is used to search through the database
  * for any claims that match the given params
  */
-app.get('/claims', (req, res) => {
+app.get("/claims", (req, res) => {
   const query = {
-    firstName: req.query['firstName'] ?? /.*/,
-    lastName: req.query['lastName'] ?? /.*/,
-    policyNumber: req.query['policyNumber'] ?? /.*/
-  }
+    firstName: req.query["firstName"] ?? /.*/,
+    lastName: req.query["lastName"] ?? /.*/,
+    policyNumber: req.query["policyNumber"] ?? /.*/,
+  };
 
   mongo
-    .then(db => db.find(query))
-    .then(db => db.toArray())
-    .then(db => JSON.stringify(db))
-    .then(db => res.end(db))
-})
+    .then((db) => db.find(query))
+    .then((db) => db.toArray())
+    .then((db) => JSON.stringify(db))
+    .then((db) => res.end(db));
+});
 
 /**
  * This endpoint returns a static map associated with a claim to
  * be displayed on the "view claims" page.
  */
-app.get('/claims/map/:claimID', (req, res) => {
+app.get("/claims/map/:claimID", (req, res) => {
   mongo
-    .then(db => db.findOne({ _id: req.params['claimID'] }))
-    .then(db => fetch(`${STATIC_MAPS}?center=${db.address}&zoom=15&size=400x250&key=${googleKey}`))
-    .then(db => db.buffer())
-    .then(db => res.end(db))
-})
+    .then((db) => db.findOne({ _id: req.params["claimID"] }))
+    .then((db) =>
+      fetch(
+        `${STATIC_MAPS}?center=${db.address}&zoom=15&size=400x250&key=${googleKey}`
+      )
+    )
+    .then((db) => db.buffer())
+    .then((db) => res.end(db));
+});
 
-app.listen(parseInt(port), host)
+//this endpoint returns autocomplete siggestions for address input in submit claim page
+app.get("/address/:input", (req, res) => {
+  fetch(`${PLACE_AUTOCOMPLETE}?input=${req.params["input"]}&key=${placesKey}`)
+    .then((response) => response.json())
+    .then((json) => res.json(json));
+  console.log(
+    `${PLACE_AUTOCOMPLETE}?input=${req.params["input"]}&key=${placesKey}`
+  );
+});
+
+app.listen(parseInt(port), host);
