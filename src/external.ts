@@ -13,7 +13,5 @@
  * limitations under the License.
  */
 
-export const STATIC_MAPS = "https://maps.googleapis.com/maps/api/staticmap";
-export const PLACE_AUTOCOMPLETE =
-  "https://maps.googleapis.com/maps/api/place/autocomplete/json";
-export const GEOCODE = "xxxx-xxxx";
+export const STATIC_MAPS = 'https://maps.googleapis.com/maps/api/staticmap'
+export const PLACE_AUTOCOMPLETE ='https://maps.googleapis.com/maps/api/place/autocomplete/json'
