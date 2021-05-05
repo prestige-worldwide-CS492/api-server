@@ -21,11 +21,15 @@ import { MongoClient } from "mongodb";
 import { v4 as UUIDv4 } from "uuid";
 import { PLACE_AUTOCOMPLETE, STATIC_MAPS } from "./external";
 
-const port = env["PORT"] ?? "8080";
-const host = env["HOST"] ?? "127.0.0.1";
-const dbHost = env["DB_HOST"] ?? "mongodb+srv://localhost:8000";
-const googleKey = env["GOOGLE_KEY"] ?? "xxxx-xxxx";
-const placesKey = env["PLACES_KEY"] ?? "xxxx-xxxx";
+const port = env.PORT ?? "8080";
+const host = env.HOST ?? "127.0.0.1";
+const dbHost = env.DB_HOST ?? "mongodb+srv://localhost:8000";
+const googleKey = env.GOOGLE_KEY ?? "xxxx-xxxx";
+
+/**
+ * Initilize express server and mongo DB driver
+ * with a connection to the claims endpoint
+ */
 const app = express();
 const mongo = MongoClient.connect(dbHost)
   .then((client) => client.db("hartford"))
@@ -109,23 +113,16 @@ app.get("/claims", (req, res) => {
 app.get("/claims/map/:claimID", (req, res) => {
   mongo
     .then((db) => db.findOne({ _id: req.params["claimID"] }))
-    .then((db) =>
-      fetch(
-        `${STATIC_MAPS}?center=${db.address}&zoom=15&size=400x250&key=${googleKey}`
-      )
-    )
+    .then((db) => fetch(`${STATIC_MAPS}?center=${db.address}&zoom=15&size=400x250&key=${googleKey}`))
     .then((db) => db.buffer())
     .then((db) => res.end(db));
 });
 
 //this endpoint returns autocomplete siggestions for address input in submit claim page
 app.get("/address/:input", (req, res) => {
-  fetch(`${PLACE_AUTOCOMPLETE}?input=${req.params["input"]}&key=${placesKey}`)
+  fetch(`${PLACE_AUTOCOMPLETE}?input=${req.params["input"]}&key=${googleKey}`)
     .then((response) => response.json())
     .then((json) => res.json(json));
-  console.log(
-    `${PLACE_AUTOCOMPLETE}?input=${req.params["input"]}&key=${placesKey}`
-  );
 });
 
 app.listen(parseInt(port), host);
