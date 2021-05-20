@@ -20,6 +20,8 @@ import { env } from "process";
 import { MongoClient } from "mongodb";
 import { v4 as UUIDv4 } from "uuid";
 import { PLACE_AUTOCOMPLETE, STATIC_MAPS } from "./external";
+import * as fs from "fs";
+import https from "https";
 
 const port = env.PORT ?? "8080";
 const host = env.HOST ?? "127.0.0.1";
@@ -37,6 +39,16 @@ const mongo = MongoClient.connect(dbHost)
 
 app.use(express.json());
 app.use(cors());
+
+const httpsServer = https.createServer(
+  {
+    key: fs.readFileSync("/etc/letsencrypt/live/team-prestige.xyz/privkey.pem"),
+    cert: fs.readFileSync(
+      "/etc/letsencrypt/live/team-prestige.xyz/fullchain.pem"
+    ),
+  },
+  app
+);
 
 /**
  * This endpoint retrieves a document from the database by its UUID.
@@ -113,7 +125,11 @@ app.get("/claims", (req, res) => {
 app.get("/claims/map/:claimID", (req, res) => {
   mongo
     .then((db) => db.findOne({ _id: req.params["claimID"] }))
-    .then((db) => fetch(`${STATIC_MAPS}?center=${db.address}&zoom=15&size=400x250&key=${googleKey}`))
+    .then((db) =>
+      fetch(
+        `${STATIC_MAPS}?center=${db.address}&zoom=15&size=400x250&key=${googleKey}`
+      )
+    )
     .then((db) => db.buffer())
     .then((db) => res.end(db));
 });
@@ -125,4 +141,4 @@ app.get("/address/:input", (req, res) => {
     .then((json) => res.json(json));
 });
 
-app.listen(parseInt(port), host);
+httpsServer.listen(parseInt(port), host);
