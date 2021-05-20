@@ -40,16 +40,6 @@ const mongo = MongoClient.connect(dbHost)
 app.use(express.json());
 app.use(cors());
 
-const httpsServer = https.createServer(
-  {
-    key: fs.readFileSync("/etc/letsencrypt/live/team-prestige.xyz/privkey.pem"),
-    cert: fs.readFileSync(
-      "/etc/letsencrypt/live/team-prestige.xyz/fullchain.pem"
-    ),
-  },
-  app
-);
-
 /**
  * This endpoint retrieves a document from the database by its UUID.
  * This endpoint expects a claim ID in the form of a UUIDv4.  It
@@ -140,5 +130,15 @@ app.get("/address/:input", (req, res) => {
     .then((response) => response.json())
     .then((json) => res.json(json));
 });
+
+const httpsServer = https.createServer(
+  {
+    key: fs.readFileSync("/etc/letsencrypt/live/team-prestige.xyz/privkey.pem"),
+    cert: fs.readFileSync(
+      "/etc/letsencrypt/live/team-prestige.xyz/fullchain.pem"
+    ),
+  },
+  app
+);
 
 httpsServer.listen(parseInt(port), host);
